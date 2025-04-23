@@ -52,9 +52,12 @@ func Guess() gin.HandlerFunc {
 		user.IncreaseCount()
 		result := CheckAnswer(user.Answer, body.Guess)
 		if result.A == 4 {
+			var u models.OverUser
+			u.ID = userId
 			database.Rdb.Del(database.Ctx, userId)
 			duration := time.Since(user.StartTime).Seconds()
-
+			u.Time = duration
+			u.Count = user.Count
 			c.JSON(http.StatusOK, gin.H{
 				"result":    "Congratulations, you won the game!",
 				"guess":     body.Guess,
@@ -62,6 +65,9 @@ func Guess() gin.HandlerFunc {
 				"duration":  fmt.Sprintf("%.2f seconds", duration),
 				"startTime": user.StartTime.Format(time.RFC3339),
 			})
+
+			us := c.MustGet("userService").(service.UserService)
+			us.InsertUser(u)
 			return
 		}
 

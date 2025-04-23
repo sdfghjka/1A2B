@@ -1,6 +1,6 @@
 import { useState } from "react";
 import WinModal from "./WinModal";
-
+import Leaderboard from "./Leaderboard";
 function GamePage() {
   const [guess, setGuess] = useState("");
   const [message, setMessage] = useState("");
@@ -152,7 +152,9 @@ function GamePage() {
               ))
             )}
           </div>
+          <Leaderboard/>
         </div>
+
       </div>
 
       {/* Win Modal */}

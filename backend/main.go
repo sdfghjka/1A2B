@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/database"
 	"backend/middleware"
 	routers "backend/routers"
 	"log"
@@ -24,7 +25,9 @@ func main() {
 		port = "8080"
 	}
 	router := gin.New()
-	router.Use(gin.Logger(), middleware.ErrorHandler())
+	db := database.MysqlDB()
+	database.InitRedis()
+	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
