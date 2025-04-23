@@ -1,6 +1,7 @@
 import { useState } from "react";
 import WinModal from "./WinModal";
 import Leaderboard from "./Leaderboard";
+
 function GamePage() {
   const [guess, setGuess] = useState("");
   const [message, setMessage] = useState("");
@@ -10,7 +11,6 @@ function GamePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (guess.length !== 4 || isNaN(guess)) {
       setMessage("請輸入有效的 4 位數字");
       return;
@@ -35,7 +35,7 @@ function GamePage() {
         setGuessHistory((prev) => [...prev, data.guess]);
 
         if (data.result.includes("Congratulations")) {
-          setWinData(data); // 顯示 Modal
+          setWinData(data);
         }
 
         setAttempts((prev) => prev + 1);
@@ -54,11 +54,13 @@ function GamePage() {
       style={{
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+        alignItems: "flex-start",
+        padding: "50px",
         backgroundColor: "#f0f4f8",
+        gap: "30px",
       }}
     >
+      {/* 左邊：遊戲主體 */}
       <div
         style={{
           backgroundColor: "white",
@@ -152,12 +154,13 @@ function GamePage() {
               ))
             )}
           </div>
-          <Leaderboard/>
         </div>
-
       </div>
 
-      {/* Win Modal */}
+      {/* 右邊：排行榜 */}
+      <Leaderboard />
+
+      {/* 勝利 Modal */}
       <WinModal
         open={!!winData}
         onClose={() => setWinData(null)}
@@ -168,3 +171,4 @@ function GamePage() {
 }
 
 export default GamePage;
+

@@ -27,7 +27,6 @@ func MysqlDB() *sql.DB {
 	if err != nil {
 		log.Fatal("MYSQLDB struct error:", err)
 	}
-	defer db.Close()
 	err = db.Ping()
 	if err != nil {
 		log.Fatal("MYSQLDB ping error:", err)

@@ -67,7 +67,11 @@ func Guess() gin.HandlerFunc {
 			})
 
 			us := c.MustGet("userService").(service.UserService)
-			us.InsertUser(u)
+			err = us.InsertUser(u)
+			if err != nil {
+				apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Failed to insert user: %v", err))
+				panic(apiErr)
+			}
 			return
 		}
 
@@ -112,4 +116,17 @@ func CheckAnswer(answer, guess string) models.Result {
 	}
 
 	return result
+}
+
+func GetRank() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		us := c.MustGet("userService").(service.UserService)
+		user, err := us.OrderByCount()
+		if err != nil {
+			apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Failed to get user rank: %v", err))
+			panic(apiErr)
+		}
+		c.JSON(http.StatusOK, user)
+	}
 }

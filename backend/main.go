@@ -26,6 +26,7 @@ func main() {
 	}
 	router := gin.New()
 	db := database.MysqlDB()
+	defer db.Close()
 	database.InitRedis()
 	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	router.Use(cors.New(cors.Config{

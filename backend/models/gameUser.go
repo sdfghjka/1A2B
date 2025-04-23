@@ -29,6 +29,6 @@ func (user *GameUser) IncreaseCount() {
 
 type OverUser struct {
 	ID    string  `json:"id"`
-	Time  float64 `json:"start_time"`
+	Time  float64 `json:"duration"`
 	Count int     `json:"count"`
 }

@@ -1,17 +1,21 @@
-// Leaderboard.jsx
 import { useEffect, useState } from "react";
 
 function Leaderboard() {
   const [leaders, setLeaders] = useState([]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/users/leaderboard");
+        const res = await fetch("http://localhost:3000/api/users/leaderboard", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         const data = await res.json();
 
         if (res.ok) {
-          setLeaders(data);
+          setLeaders(Array.isArray(data) ? data : []); // 保證 data 是陣列
         } else {
           console.error("無法取得排行榜", data.error);
         }
@@ -42,7 +46,7 @@ function Leaderboard() {
       ) : (
         leaders.map((user, index) => (
           <div
-            key={user._id}
+            key={user.id}
             style={{
               marginBottom: "10px",
               fontWeight: "bold",
@@ -50,10 +54,8 @@ function Leaderboard() {
               justifyContent: "space-between",
             }}
           >
-            <span>
-              {index + 1}. {user.username}
-            </span>
-            <span>{user.score} 分</span>
+            <span>{index + 1}. 玩家 {user.id.slice(0, 6)}</span>
+            <span>{user.count} 次 / {user.duration.toFixed(1)} 秒</span>
           </div>
         ))
       )}
