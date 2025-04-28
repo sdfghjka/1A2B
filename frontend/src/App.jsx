@@ -1,15 +1,13 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // 引入 useLocation 和 useNavigate
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const location = useLocation(); // 使用 useLocation 來讀取傳遞過來的狀態
-  const navigate = useNavigate(); // 用來進行頁面導航
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +31,10 @@ function App() {
       if (response.ok) {
         // 登入成功，將 token 儲存到 localStorage 或 sessionStorage
         localStorage.setItem("token", data.token); // 儲存 token
-        navigate("/gamestart"); // 假設登入成功後跳轉到 dashboard 頁面
+        localStorage.setItem("user", JSON.stringify(data)); // 儲存用戶資料
+
+        // 跳轉到遊戲開始頁面
+        navigate("/gamestart");
       } else {
         // 登入失敗，顯示錯誤訊息
         setErrorMessage(data.error || "登入失敗，請檢查帳號和密碼");
@@ -43,17 +44,18 @@ function App() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/api/auth/google";
+  };
+
+  const handleFacebookLogin = () => {
+    setErrorMessage("Facebook 登入功能尚未實現");
+  };
+
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div className="card p-4 shadow text-center" style={{ width: "400px" }}>
         <h2 className="mb-3">登入</h2>
-
-        {/* 顯示註冊成功的訊息 */}
-        {location.state?.successMessage && (
-          <div className="alert alert-success" role="alert">
-            {location.state.successMessage}
-          </div>
-        )}
 
         {/* 顯示錯誤訊息 */}
         {errorMessage && (
@@ -91,20 +93,19 @@ function App() {
         <div className="mt-3">
           <p>或使用其他方式登入</p>
           <div className="d-grid gap-2">
-            <button className="btn btn-outline-primary d-flex align-items-center justify-content-center">
+            <button 
+              className="btn btn-outline-primary d-flex align-items-center justify-content-center"
+              onClick={handleFacebookLogin}
+            >
               <FaFacebook size={20} className="me-2" /> 使用 Facebook 登入
             </button>
-            <button className="btn btn-outline-danger d-flex align-items-center justify-content-center">
+            <button 
+              className="btn btn-outline-danger d-flex align-items-center justify-content-center"
+              onClick={handleGoogleLogin}
+            >
               <FaGoogle size={20} className="me-2" /> 使用 Google 登入
             </button>
           </div>
-        </div>
-
-        {/* 註冊頁面按鈕 */}
-        <div className="mt-3">
-          <Link to="/signup" className="btn btn-link">
-            還沒有帳號? 註冊
-          </Link>
         </div>
       </div>
     </div>

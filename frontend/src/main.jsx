@@ -6,6 +6,7 @@ import App from './App.jsx';
 import Signup from './Signup.jsx';
 import GamePage from './GamePage.jsx';
 import StartPage from './StartPage.jsx';
+import AuthCallback from './AuthCallback.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 createRoot(document.getElementById('root')).render(
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/signup" element={<Signup />} />  {/* 使用 element 而不是 component */}
         <Route path="/gamestart" element={<StartPage />} />
         <Route path="/game" element={<GamePage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
     </Router>
   </StrictMode>

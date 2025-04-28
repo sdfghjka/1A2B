@@ -4,6 +4,7 @@ import (
 	"backend/database"
 	"backend/middleware"
 	routers "backend/routers"
+	"backend/service"
 	"log"
 	"os"
 	"time"
@@ -28,6 +29,7 @@ func main() {
 	db := database.MysqlDB()
 	defer db.Close()
 	database.InitRedis()
+	service.InitOAuthProviders()
 	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
@@ -37,10 +39,6 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	router.GET("/api2", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"success": "Access granted for api2"})
-	})
 	api := router.Group("/api")
 	routers.AuthRouters(api)
 	routers.UserRouters(api)

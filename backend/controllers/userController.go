@@ -112,7 +112,6 @@ func Login() gin.HandlerFunc {
 			// c.JSON(http.StatusBadRequest, gin.H{"error": "Email or Password is incorrect"})
 			appErr := service.NewError(service.ValidateErr, fmt.Errorf("user not found: %w", err))
 			panic(appErr)
-			return
 		}
 		passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
 		defer cancel()
