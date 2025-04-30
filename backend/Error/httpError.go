@@ -1,32 +1,40 @@
 package httpError
 
 import (
-	"backend/service"
 	"errors"
 	"net/http"
 )
 
 type APIError struct {
-	Status  int
-	Message string
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
 }
 
-func FromError(err error) APIError {
-	var apiErr APIError
-	var svcError service.Error
-	if errors.As(err, &svcError) {
-		apiErr.Message = svcError.AppError().Error()
-		svcErr := svcError.SvcError()
-		switch svcErr {
-		case service.ErrBadRequest:
-			apiErr.Status = http.StatusBadRequest
-		case service.ErrInternalFailure:
-			apiErr.Status = http.StatusInternalServerError
-		case service.ValidateErr:
-			apiErr.Status = http.StatusForbidden
-		case service.ErrNotfound:
-			apiErr.Status = http.StatusNotFound
-		}
+func (e *APIError) Error() string {
+	return e.Message
+}
+
+func New(statusCode int, msg string) *APIError {
+	return &APIError{
+		StatusCode: statusCode,
+		Message:    msg,
 	}
-	return apiErr
+}
+
+var (
+	ErrBadRequest   = &APIError{StatusCode: http.StatusBadRequest, Message: "Bad Request"}
+	ErrUnauthorized = &APIError{StatusCode: http.StatusUnauthorized, Message: "Unauthorized"}
+	ErrForbidden    = &APIError{StatusCode: http.StatusForbidden, Message: "Forbidden"}
+	ErrNotFound     = &APIError{StatusCode: http.StatusNotFound, Message: "Resource Not Found"}
+	ErrInternal     = &APIError{StatusCode: http.StatusInternalServerError, Message: "Internal Server Error"}
+	ErrInvalidInput = &APIError{StatusCode: http.StatusBadRequest, Message: "Invalid Input"}
+	ErrLoginFailed  = &APIError{StatusCode: http.StatusUnauthorized, Message: "Email or Password is incorrect"}
+)
+
+func FromError(err error) *APIError {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) {
+		return apiErr
+	}
+	return ErrInternal
 }

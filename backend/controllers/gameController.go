@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	httpError "backend/Error"
 	"backend/database"
 	"backend/helpers"
 	"backend/models"
@@ -21,12 +22,12 @@ func GenerateAnswer() gin.HandlerFunc {
 		user := models.NewUser(userId, answer)
 		val, err := jsoniter.Marshal(user)
 		if err != nil {
-			panic(service.NewError(service.ErrInternalFailure, fmt.Errorf("JSON encode falied")))
+			panic(httpError.New(httpError.ErrInternal.StatusCode, "JSON encode falied"))
 		}
 		err = database.Rdb.Set(database.Ctx, userId, val, 5*time.Minute).Err()
 		if err != nil {
-			apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Redis 存資料失敗"))
-			panic(apiErr)
+
+			panic(httpError.New(httpError.ErrInternal.StatusCode, "Redis 寫入失敗"))
 		}
 		c.JSON(http.StatusOK, gin.H{"userId": userId})
 	}
@@ -38,14 +39,14 @@ func Guess() gin.HandlerFunc {
 			Guess string `json:"guess"`
 		}
 		if err := c.ShouldBindJSON(&body); err != nil {
-			apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Can't accept your answer"))
-			panic(apiErr)
+
+			panic(httpError.New(httpError.ErrInternal.StatusCode, "Can't accept your answer"))
 		}
 		userId := c.GetString("uid")
 		data, err := database.Rdb.Get(database.Ctx, userId).Result()
 		if err != nil {
-			apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Failed to get game data"))
-			panic(apiErr)
+
+			panic(httpError.New(httpError.ErrInternal.StatusCode, "Get data from Redis failed"))
 		}
 		var user models.GameUser
 		err = jsoniter.Unmarshal([]byte(data), &user)
@@ -69,8 +70,8 @@ func Guess() gin.HandlerFunc {
 			us := c.MustGet("userService").(service.UserService)
 			err = us.InsertUser(u)
 			if err != nil {
-				apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Failed to insert user: %v", err))
-				panic(apiErr)
+
+				panic(httpError.New(httpError.ErrInternal.StatusCode, "Failed to insert user"))
 			}
 			return
 		}
@@ -124,8 +125,7 @@ func GetRank() gin.HandlerFunc {
 		us := c.MustGet("userService").(service.UserService)
 		user, err := us.OrderByCount()
 		if err != nil {
-			apiErr := service.NewError(service.ErrInternalFailure, fmt.Errorf("Failed to get user rank: %v", err))
-			panic(apiErr)
+			panic(err)
 		}
 		c.JSON(http.StatusOK, user)
 	}

@@ -16,8 +16,7 @@ func ErrorHandler() gin.HandlerFunc {
 					err = fmt.Errorf("%v", r)
 				}
 				apiErr := httpError.FromError(err)
-				fmt.Printf("Error: %v\n", err)
-				c.AbortWithStatusJSON(int(apiErr.Status), gin.H{"error": apiErr.Message})
+				c.AbortWithStatusJSON(apiErr.StatusCode, gin.H{"error": apiErr.Message})
 			}
 		}()
 		c.Next()

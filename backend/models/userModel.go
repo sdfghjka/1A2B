@@ -7,16 +7,17 @@ import (
 )
 
 type User struct {
-	ID            primitive.ObjectID `bjson:"_id"`
-	First_name    *string            `json:"first_name" validate:"required,min=2,max=100"`
-	Last_name     *string            `json:"last_name" validate:"min=2,max=100"`
-	Password      *string            `json:"Password" validate:"required,min=6"`
-	Email         *string            `json:"email"	validate:"required"`
-	Phone         *string            `json::"phone"`
-	Token         *string            `json:"token"`
-	User_type     *string            `json:"user_type" validate:"required,eq=ADMIN|eq=USER"`
-	Refresh_token *string            `json:"refresh_token"`
-	Created_at    time.Time          `json:"created_at"`
-	Updated_at    time.Time          `json:"updated_at"`
-	User_id       string             `json:"user_id"`
+	ID            primitive.ObjectID `bson:"_id" json:"_id"`
+	First_name    *string            `bson:"first_name" json:"first_name" validate:"required,min=2,max=100"`
+	Last_name     *string            `bson:"last_name" json:"last_name" validate:"min=2,max=100"`
+	Password      *string            `bson:"password" json:"password" validate:"required,min=6"`
+	Email         *string            `bson:"email" json:"email" validate:"required,email"`
+	Phone         *string            `bson:"phone" json:"phone"`
+	Token         *string            `bson:"token" json:"token"`
+	User_type     *string            `bson:"user_type" json:"user_type" validate:"required,oneof=ADMIN USER"`
+	Refresh_token *string            `bson:"refresh_token" json:"refresh_token"`
+	Created_at    time.Time          `bson:"created_at" json:"created_at"`
+	Updated_at    time.Time          `bson:"updated_at" json:"updated_at"`
+	User_id       string             `bson:"user_id" json:"user_id"`
+	Provider      string             `bson:"provider" json:"provider" validate:"required,oneof=Google Local"`
 }
