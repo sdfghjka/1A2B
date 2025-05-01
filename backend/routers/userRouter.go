@@ -2,6 +2,7 @@ package routers
 
 import (
 	controllers "backend/controllers"
+
 	"backend/middleware"
 
 	"github.com/gin-gonic/gin"

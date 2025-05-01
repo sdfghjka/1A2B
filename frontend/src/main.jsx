@@ -8,6 +8,7 @@ import GamePage from './GamePage.jsx';
 import StartPage from './StartPage.jsx';
 import AuthCallback from './AuthCallback.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import GameRoomPage from './GameRoomPage.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/gamestart" element={<StartPage />} />
         <Route path="/game" element={<GamePage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/multiplayer" element={<GameRoomPage />} /> 
       </Routes>
     </Router>
   </StrictMode>

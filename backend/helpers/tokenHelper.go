@@ -3,7 +3,7 @@ package helpers
 import (
 	"backend/database"
 	"context"
-	"fmt"
+	"strings"
 
 	"log"
 	"os"
@@ -53,7 +53,10 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 	return token, refreshToken, err
 }
 
-func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
+func ValidateToken(signedToken string) (*SignedDetails, string) {
+	signedToken = strings.TrimSpace(signedToken)
+	signedToken = strings.TrimPrefix(signedToken, "Bearer ")
+	signedToken = strings.Trim(signedToken, `"`)
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&SignedDetails{},
@@ -62,22 +65,19 @@ func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
 		},
 	)
 	if err != nil {
-		msg = err.Error()
-		return
+		return nil, "token parsing error: " + err.Error()
 	}
+
 	claims, ok := token.Claims.(*SignedDetails)
 	if !ok {
-		msg = fmt.Sprintf("the token invalid")
-		msg = err.Error()
-		return
+		return nil, "token claims type mismatch"
 	}
-	if claims.ExpiresAt < time.Now().Local().Unix() {
-		msg = fmt.Sprintf("token is expired")
-		msg = err.Error()
-		return
-	}
-	return claims, msg
 
+	if claims.ExpiresAt < time.Now().Unix() {
+		return nil, "token is expired"
+	}
+
+	return claims, ""
 }
 
 func UpdateAllTokens(signedToken string, signedRefreshToken string, userId string) {

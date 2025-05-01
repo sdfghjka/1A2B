@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -38,27 +37,18 @@ func CreateUser(user *models.User, ctx context.Context, provider string) error {
 	if exists, err := checkExists(ctx, "email", user.Email); err != nil {
 		return httpError.ErrInternal
 	} else if exists {
-		return &httpError.APIError{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Email already exists",
-		}
+		return httpError.New(httpError.ErrBadRequest.StatusCode, "Email already exists")
 	}
 	// check Phone number exist
 	if exists, err := checkExists(ctx, "phone", user.Phone); err != nil {
 		return httpError.ErrInternal
 	} else if exists {
-		return &httpError.APIError{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Phone number already exists",
-		}
+		return httpError.New(httpError.ErrBadRequest.StatusCode, "Phone number already exists")
 	}
 	//set password
 	if user.Password == nil {
 		if provider == "Local" {
-			return &httpError.APIError{
-				StatusCode: http.StatusBadRequest,
-				Message:    "Password is required for local accounts",
-			}
+			return httpError.New(httpError.ErrBadRequest.StatusCode, "Password is required for local accounts")
 		}
 		randomPassword := helpers.GenerateRandomPassword(12)
 		user.Password = &randomPassword
@@ -128,5 +118,5 @@ func checkExists(ctx context.Context, field string, value *string) (bool, error)
 	return count > 0, nil
 }
 
-func FindUserById(id string) (*models.User, error)
-func ListUsers(page int, recordPerPage int) ([]models.User, int, error)
+// func FindUserById(id string) (*models.User, error)
+// func ListUsers(page int, recordPerPage int) ([]models.User, int, error)

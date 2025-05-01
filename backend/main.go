@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/controllers"
 	"backend/database"
 	"backend/middleware"
 	routers "backend/routers"
@@ -30,6 +31,7 @@ func main() {
 	defer db.Close()
 	database.InitRedis()
 	service.InitOAuthProviders()
+	router.GET("/api/ws", controllers.JoinRoomHandler)
 	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},

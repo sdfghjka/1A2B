@@ -30,6 +30,7 @@ func Signup() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		user.Provider = "Local"
 		validateErr := validate.Struct(user)
 		if validateErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": validateErr.Error()})
@@ -39,6 +40,7 @@ func Signup() gin.HandlerFunc {
 		defer cancel()
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "user created successfully"})
 	}
