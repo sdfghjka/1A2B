@@ -2,56 +2,42 @@ import React, { useEffect, useState } from "react";
 import GameBoard from "./GameBoard";
 
 function GameRoomPage() {
-  const [roomId, setRoomId] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [roomJoined, setRoomJoined] = useState(false);
+  const [roomId, setRoomId] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token 不存在，請先登入！");
-      return;
-    }
-
-    const ws = new WebSocket(`ws://localhost:3000/api/ws?roomId=default&token=${token}`);
-
-    ws.onopen = () => {
-      console.log("✅ WebSocket connected");
-    };
+    const ws = new WebSocket(`ws://localhost:3000/api/ws?token=${token}`);
+    setSocket(ws);
 
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "roomJoined") {
-        setRoomId(msg.data.roomId);
+        setRoomJoined(true);
+        if (msg.data?.roomId) {
+          setRoomId(msg.data.roomId);
+        }
       }
     };
 
-    ws.onerror = (err) => {
-      console.error("❌ WebSocket error:", err);
-    };
+    ws.onerror = (e) => console.error("WebSocket error:", e);
+    ws.onclose = () => console.log("WebSocket closed");
 
-    ws.onclose = () => {
-      console.warn("❎ WebSocket disconnected");
-    };
-
-    setSocket(ws);
-
-    return () => {
-      ws.close();
-    };
+    return () => ws.close();
   }, []);
 
   return (
     <div>
       <h2>多人對戰房間</h2>
-      {roomId && socket ? (
-        <GameBoard socket={socket} />
+      {roomJoined && socket ? (
+        <GameBoard socket={socket} roomId={roomId} />
       ) : (
-        <p>等待加入房間...</p>
+        <p>等待配對中...</p>
       )}
     </div>
   );
 }
 
 export default GameRoomPage;
-
-
+  

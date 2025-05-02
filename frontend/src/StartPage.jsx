@@ -1,11 +1,10 @@
-// StartPage.js
 import { useNavigate } from "react-router-dom";
 
 function StartPage() {
   const navigate = useNavigate();
 
   const startGame = async () => {
-    const token = localStorage.getItem("token"); // 取得 token
+    const token = localStorage.getItem("token");
     try {
       const res = await fetch("http://localhost:3000/api/users/game/random", {
         method: "GET",
@@ -26,13 +25,20 @@ function StartPage() {
       alert(err.message || "連線失敗");
     }
   };
+
+  const goToMultiplayer = () => {
+    navigate("/multiplayer"); // 導向即時對戰頁面
+  };
+
   return (
     <div
       style={{
         display: "flex",
+        flexDirection: "column", // 垂直排列按鈕
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
+        gap: "20px", // 按鈕之間間距
       }}
     >
       <button
@@ -46,7 +52,21 @@ function StartPage() {
           borderRadius: "5px",
         }}
       >
-        開始遊戲
+        單人模式
+      </button>
+
+      <button
+        onClick={goToMultiplayer}
+        style={{
+          fontSize: "20px",
+          padding: "15px 30px",
+          backgroundColor: "#28a745",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+        }}
+      >
+        即時對戰
       </button>
     </div>
   );

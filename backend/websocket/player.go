@@ -13,15 +13,14 @@ type Player struct {
 	RoomID string
 	Send   chan []byte
 }
+
 type Message struct {
 	Type    string `json:"type"`
 	Payload string `json:"payload"`
 }
 
 func (p *Player) ReadMessages() {
-	defer func() {
-		p.Conn.Close()
-	}()
+	defer p.Conn.Close()
 
 	for {
 		_, msg, err := p.Conn.ReadMessage()
@@ -38,7 +37,7 @@ func (p *Player) ReadMessages() {
 		case "guess":
 			handleGuess(p, message.Payload)
 		case "chat":
-			broadcastToRoom(p.RoomID, msg)
+			handleChat(p, message.Payload)
 		}
 	}
 }
@@ -52,16 +51,19 @@ func (p *Player) WriteMessages() {
 	}
 }
 
-func broadcastToRoom(roomID string, msg []byte) {
-	room := GameHub.Rooms[roomID]
+func handleGuess(player *Player, guess string) {
+	log.Printf("📩 玩家 %s 猜了：%s\n", player.ID, guess)
+}
+
+func handleChat(player *Player, text string) {
+	room := GameHub.Rooms[player.RoomID]
 	if room == nil {
 		return
 	}
-	for _, player := range room.Players {
-		player.Send <- msg
-	}
-}
 
-func handleGuess(player *Player, guess string) {
-	log.Printf("玩家 %s 猜了：%s\n", player.ID, guess)
+	message := `{"type":"chat", "payload":"` + player.ID + `: ` + text + `"}`
+
+	for _, p := range room.Players {
+		p.Send <- []byte(message)
+	}
 }
