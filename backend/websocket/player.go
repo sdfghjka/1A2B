@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"backend/helpers"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -35,7 +36,7 @@ func (p *Player) ReadMessages() {
 
 		switch message.Type {
 		case "guess":
-			handleGuess(p, message.Payload)
+			handleGuess(p, message.Payload, p.RoomID)
 		case "chat":
 			handleChat(p, message.Payload)
 		}
@@ -51,8 +52,11 @@ func (p *Player) WriteMessages() {
 	}
 }
 
-func handleGuess(player *Player, guess string) {
-	log.Printf("📩 玩家 %s 猜了：%s\n", player.ID, guess)
+func handleGuess(player *Player, guess string, roomID string) {
+	room := GameHub.FindRoom(roomID)
+	answer := room.Answer
+	result := helpers.CheckAnswer(answer, guess)
+	log.Println(result)
 }
 
 func handleChat(player *Player, text string) {

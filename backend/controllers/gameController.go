@@ -8,7 +8,6 @@ import (
 	"backend/service"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +50,7 @@ func Guess() gin.HandlerFunc {
 		var user models.GameUser
 		err = jsoniter.Unmarshal([]byte(data), &user)
 		user.IncreaseCount()
-		result := CheckAnswer(user.Answer, body.Guess)
+		result := helpers.CheckAnswer(user.Answer, body.Guess)
 		if result.A == 4 {
 			var u models.OverUser
 			u.ID = userId
@@ -78,45 +77,8 @@ func Guess() gin.HandlerFunc {
 
 		val, _ := jsoniter.Marshal(user)
 		database.Rdb.Set(database.Ctx, userId, val, 5*time.Minute)
-		c.JSON(http.StatusOK, gin.H{"result": CheckResult(result), "guess": body.Guess})
+		c.JSON(http.StatusOK, gin.H{"result": helpers.CheckResult(result), "guess": body.Guess})
 	}
-}
-
-func CheckResult(result models.Result) string {
-	if result.A == 4 {
-		return "Congratulations, you won the game!"
-	}
-	return fmt.Sprintf("%dA%dB", result.A, result.B)
-}
-func CheckAnswer(answer, guess string) models.Result {
-	result := models.Result{}
-	answerSlice := strings.Split(answer, "")
-	guessSlice := strings.Split(guess, "")
-	usedAnswer := make([]bool, len(answerSlice))
-	usedGuess := make([]bool, len(guessSlice))
-
-	for i := 0; i < len(answerSlice); i++ {
-		if answerSlice[i] == guessSlice[i] {
-			result.A++
-			usedAnswer[i] = true
-			usedGuess[i] = true
-		}
-	}
-
-	for i := 0; i < len(answerSlice); i++ {
-		if usedAnswer[i] {
-			continue
-		}
-		for j := 0; j < len(guessSlice); j++ {
-			if !usedGuess[j] && answerSlice[i] == guessSlice[j] && i != j {
-				result.B++
-				usedGuess[j] = true
-				break
-			}
-		}
-	}
-
-	return result
 }
 
 func GetRank() gin.HandlerFunc {
