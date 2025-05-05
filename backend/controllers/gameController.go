@@ -6,6 +6,7 @@ import (
 	"backend/helpers"
 	"backend/models"
 	"backend/service"
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -52,7 +53,7 @@ func Guess() gin.HandlerFunc {
 		user.IncreaseCount()
 		result := helpers.CheckAnswer(user.Answer, body.Guess)
 		if result.A == 4 {
-			var u models.OverUser
+			var u models.RankedUser
 			u.ID = userId
 			database.Rdb.Del(database.Ctx, userId)
 			duration := time.Since(user.StartTime).Seconds()
@@ -83,9 +84,10 @@ func Guess() gin.HandlerFunc {
 
 func GetRank() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 		us := c.MustGet("userService").(service.UserService)
-		user, err := us.OrderByCount()
+		user, err := us.GetRankedUsers(ctx)
+		defer cancel()
 		if err != nil {
 			panic(err)
 		}

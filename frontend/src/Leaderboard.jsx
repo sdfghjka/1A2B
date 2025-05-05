@@ -14,8 +14,14 @@ function Leaderboard() {
         });
         const data = await res.json();
 
-        if (res.ok) {
-          setLeaders(Array.isArray(data) ? data : []); // 保證 data 是陣列
+        if (res.ok && Array.isArray(data)) {
+          const formatted = data.map(user => ({
+            id: user.id ?? "",
+            name: user.name ?? "無名玩家",
+            count: typeof user.count === "number" ? user.count : 0,
+            time: typeof user.time === "number" ? user.time : 0
+          }));
+          setLeaders(formatted);
         } else {
           console.error("無法取得排行榜", data.error);
         }
@@ -54,8 +60,8 @@ function Leaderboard() {
               justifyContent: "space-between",
             }}
           >
-            <span>{index + 1}. 玩家 {user.id.slice(0, 6)}</span>
-            <span>{user.count} 次 / {user.duration.toFixed(1)} 秒</span>
+            <span>{index + 1}. {user.name}</span>
+            <span>{user.count} 次 / {user.time.toFixed(1)} 秒</span>
           </div>
         ))
       )}
@@ -64,3 +70,4 @@ function Leaderboard() {
 }
 
 export default Leaderboard;
+

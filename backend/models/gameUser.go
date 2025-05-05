@@ -27,8 +27,9 @@ func (user *GameUser) IncreaseCount() {
 	user.Count++
 }
 
-type OverUser struct {
+type RankedUser struct {
 	ID    string  `json:"id"`
+	Name  string  `json:"name"`
 	Time  float64 `json:"duration"`
 	Count int     `json:"count"`
 }

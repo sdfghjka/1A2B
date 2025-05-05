@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -118,5 +119,33 @@ func checkExists(ctx context.Context, field string, value *string) (bool, error)
 	return count > 0, nil
 }
 
-// func FindUserById(id string) (*models.User, error)
+func FindUsersByIDs(ctx context.Context, ids []string) (map[string]string, error) {
+	filter := bson.M{"user_id": bson.M{"$in": ids}}
+
+	cursor, err := userCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("mongo find error: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	result := make(map[string]string)
+	for cursor.Next(ctx) {
+		var u models.User
+		if err := cursor.Decode(&u); err != nil {
+			log.Println("decode failed:", err)
+			continue
+		}
+		first := ""
+		last := ""
+		if u.First_name != nil {
+			first = *u.First_name
+		}
+		if u.Last_name != nil {
+			last = *u.Last_name
+		}
+		result[u.User_id] = first + " " + last
+	}
+	return result, nil
+}
+
 // func ListUsers(page int, recordPerPage int) ([]models.User, int, error)
