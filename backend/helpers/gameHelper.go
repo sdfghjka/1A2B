@@ -29,6 +29,9 @@ func CheckResult(result models.Result) string {
 	return fmt.Sprintf("%dA%dB", result.A, result.B)
 }
 func CheckAnswer(answer, guess string) models.Result {
+	if len(answer) != len(guess) {
+		return models.Result{}
+	}
 	result := models.Result{}
 	answerSlice := strings.Split(answer, "")
 	guessSlice := strings.Split(guess, "")

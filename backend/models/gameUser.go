@@ -10,8 +10,8 @@ type GameUser struct {
 }
 
 type Result struct {
-	A int
-	B int
+	A int `json:"a"`
+	B int `json:"b"`
 }
 
 func NewUser(id, answer string) *GameUser {

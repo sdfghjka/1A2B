@@ -15,8 +15,8 @@ function GameRoomPage() {
       const msg = JSON.parse(event.data);
       if (msg.type === "roomJoined") {
         setRoomJoined(true);
-        if (msg.data?.roomId) {
-          setRoomId(msg.data.roomId);
+        if (msg.payload?.roomId) {
+          setRoomId(msg.payload.roomId);
         }
       }
     };
@@ -40,4 +40,4 @@ function GameRoomPage() {
 }
 
 export default GameRoomPage;
-  
+

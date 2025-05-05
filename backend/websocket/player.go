@@ -1,9 +1,6 @@
 package websocket
 
 import (
-	"backend/helpers"
-	"log"
-
 	"github.com/gorilla/websocket"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -16,8 +13,9 @@ type Player struct {
 }
 
 type Message struct {
-	Type    string `json:"type"`
-	Payload string `json:"payload"`
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
+	From    string      `json:"from,omitempty"`
 }
 
 func (p *Player) ReadMessages() {
@@ -29,16 +27,26 @@ func (p *Player) ReadMessages() {
 			break
 		}
 
-		var message Message
-		if err := jsoniter.Unmarshal(msg, &message); err != nil {
+		var raw struct {
+			Type    string              `json:"type"`
+			Payload jsoniter.RawMessage `json:"payload"`
+			From    string              `json:"from,omitempty"`
+		}
+		if err := jsoniter.Unmarshal(msg, &raw); err != nil {
 			continue
 		}
 
-		switch message.Type {
+		switch raw.Type {
 		case "guess":
-			handleGuess(p, message.Payload, p.RoomID)
+			var guessStr string
+			if err := jsoniter.Unmarshal(raw.Payload, &guessStr); err == nil {
+				handleGuess(p, guessStr)
+			}
 		case "chat":
-			handleChat(p, message.Payload)
+			var chatText string
+			if err := jsoniter.Unmarshal(raw.Payload, &chatText); err == nil {
+				handleChat(p, chatText)
+			}
 		}
 	}
 }
@@ -49,25 +57,5 @@ func (p *Player) WriteMessages() {
 		if err != nil {
 			break
 		}
-	}
-}
-
-func handleGuess(player *Player, guess string, roomID string) {
-	room := GameHub.FindRoom(roomID)
-	answer := room.Answer
-	result := helpers.CheckAnswer(answer, guess)
-	log.Println(result)
-}
-
-func handleChat(player *Player, text string) {
-	room := GameHub.Rooms[player.RoomID]
-	if room == nil {
-		return
-	}
-
-	message := `{"type":"chat", "payload":"` + player.ID + `: ` + text + `"}`
-
-	for _, p := range room.Players {
-		p.Send <- []byte(message)
 	}
 }

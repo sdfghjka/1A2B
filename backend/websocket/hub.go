@@ -4,6 +4,8 @@ import (
 	"backend/helpers"
 	"log"
 	"sync"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type Hub struct {
@@ -17,12 +19,6 @@ var GameHub = &Hub{
 	MatchQueue: make([]*Player, 0),
 }
 
-func (h *Hub) FindRoom(roomID string) *Room {
-	if room, exist := h.Rooms[roomID]; exist {
-		return room
-	}
-	return nil
-}
 func (h *Hub) MatchPlayer(player *Player) {
 	h.Mutex.Lock()
 	log.Printf("%s Waiting....", player.ID)
@@ -44,13 +40,25 @@ func (h *Hub) MatchPlayer(player *Player) {
 		room.Players[opponent.ID] = opponent
 		log.Println(opponent.ID)
 		GameHub.Rooms[roomID] = room
-
 		player.RoomID = roomID
 		opponent.RoomID = roomID
+		room.CurrentTurnID = NextPlayer(room.Players, "")
+		roomMsg := Message{
+			Type: "roomJoined",
+			Payload: map[string]string{
+				"roomId": roomID,
+			},
+			From: player.ID,
+		}
+		roomJSON, err := jsoniter.Marshal(roomMsg)
+		if err != nil {
+			log.Println("Failed to marshal roomJoined:", err)
+			return
+		}
 
-		roomMessage := `{"type":"roomJoined", "data":{"roomId":"` + roomID + `"}}`
-		player.Send <- []byte(roomMessage)
-		opponent.Send <- []byte(roomMessage)
+		log.Println(string(roomJSON))
+		player.Send <- []byte(roomJSON)
+		opponent.Send <- []byte(roomJSON)
 	} else {
 		h.MatchQueue = append(h.MatchQueue, player)
 	}

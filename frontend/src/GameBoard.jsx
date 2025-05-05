@@ -25,21 +25,8 @@ function GameBoard({ socket, roomId }) {
 
     socket.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-      console.log("📩 收到訊息:", msg);
-
-      switch (msg.type) {
-        case "guessResult":
-          setMessages((prev) => [...prev, msg]);
-          break;
-        case "chat":
-          setMessages((prev) => [...prev, { chat: msg.payload }]);
-          break;
-        case "gameOver":
-          alert(msg.data);
-          break;
-        default:
-          setMessages((prev) => [...prev, { system: `📎 收到未知訊息: ${msg.type}` }]);
-      }
+      console.log("📩 Received:", msg);
+      setMessages((prev) => [...prev, msg]);
     };
 
     return () => {
@@ -47,46 +34,89 @@ function GameBoard({ socket, roomId }) {
     };
   }, [socket]);
 
-  return (
-    <div>
-      <h3>房間：{roomId || "未加入"}</h3>
+  const renderMessage = (msg, index) => {
+    switch (msg.type) {
+      case "guessResult":
+        return (
+          <p key={index}>
+            🧠 <strong>{msg.from}</strong> guessed ➜{" "}
+            <span style={{ color: "green" }}>{msg.payload}</span>
+          </p>
+        );
+      case "chat":
+        return (
+          <p key={index}>
+            💬 <strong>{msg.from}</strong>: {msg.payload}
+          </p>
+        );
+      case "roomJoined":
+        return (
+          <p key={index} style={{ color: "purple" }}>
+            🔗 <strong>{msg.from}</strong> joined room{" "}
+            <strong>{msg.payload.roomId}</strong>
+          </p>
+        );
+      case "gameOver":
+        return (
+          <p key={index} style={{ color: "red" }}>
+            🎉 Game Over: {msg.payload}
+          </p>
+        );
+      case "system":
+        return (
+          <p key={index} style={{ color: "gray" }}>
+            🔔 {msg.payload}
+          </p>
+        );
+      default:
+        return (
+          <p key={index} style={{ color: "orange" }}>
+            ⚠ Unknown message type: {msg.type}
+          </p>
+        );
+    }
+  };
 
-      <form onSubmit={handleSubmit}>
+  return (
+    <div style={{ padding: "1rem", maxWidth: 600, margin: "auto" }}>
+      <h3>Room ID: {roomId || "Waiting to join..."}</h3>
+
+      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
         <input
           type="text"
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
           maxLength={4}
-          placeholder="輸入四位數"
+          placeholder="Enter 4-digit guess"
+          required
         />
-        <button type="submit">提交</button>
+        <button type="submit">Submit Guess</button>
       </form>
 
-      <form onSubmit={handleChatSubmit} style={{ marginTop: "1rem" }}>
+      <form onSubmit={handleChatSubmit}>
         <input
           type="text"
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
-          placeholder="💬 傳送訊息"
+          placeholder="Send a chat message"
+          required
         />
-        <button type="submit">送出</button>
+        <button type="submit">Send</button>
       </form>
 
-      <div style={{ marginTop: "1rem" }}>
-        {messages.map((msg, index) => {
-          if (msg.system) return <p key={index} style={{ color: "gray" }}>{msg.system}</p>;
-          if (msg.chat) return <p key={index} style={{ color: "blue" }}>💬 {msg.chat}</p>;
-          return (
-            <p key={index}>
-              🧠 {msg.guess} ➜ 🎯 {msg.result}
-            </p>
-          );
-        })}
+      <div
+        style={{
+          marginTop: "1.5rem",
+          background: "#f8f8f8",
+          padding: "1rem",
+          borderRadius: "8px",
+        }}
+      >
+        {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
     </div>
   );
 }
 
 export default GameBoard;
-
 
