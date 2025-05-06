@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -19,7 +21,11 @@ type Message struct {
 }
 
 func (p *Player) ReadMessages() {
-	defer p.Conn.Close()
+	defer func() {
+		log.Printf("Player %s disconnected", p.ID)
+		GameHub.RemoveFormRoom(p)
+		p.Conn.Close()
+	}()
 
 	for {
 		_, msg, err := p.Conn.ReadMessage()
@@ -46,6 +52,12 @@ func (p *Player) ReadMessages() {
 			var chatText string
 			if err := jsoniter.Unmarshal(raw.Payload, &chatText); err == nil {
 				handleChat(p, chatText)
+			}
+		case "leave":
+			var leaveMsg string
+			if err := jsoniter.Unmarshal(raw.Payload, &leaveMsg); err == nil {
+				GameHub.RemoveFormRoom(p)
+				return
 			}
 		}
 	}

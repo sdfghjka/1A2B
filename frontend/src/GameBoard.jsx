@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function GameBoard({ socket, roomId }) {
   const [guess, setGuess] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,19 +22,34 @@ function GameBoard({ socket, roomId }) {
     }
   };
 
+  const handleLeave = () => {
+    if (socket) {
+      socket.send(JSON.stringify({ type: "leave" }));
+      socket.close();
+    }
+    navigate("/gamestart");
+  };
+
   useEffect(() => {
     if (!socket) return;
 
     socket.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       console.log("📩 Received:", msg);
+
+      if (msg.type === "playerLeft") {
+        alert("對手已離開，返回首頁");
+        navigate("/gamestart");
+        return;
+      }
+
       setMessages((prev) => [...prev, msg]);
     };
 
     return () => {
       socket.onmessage = null;
     };
-  }, [socket]);
+  }, [socket, navigate]);
 
   const renderMessage = (msg, index) => {
     switch (msg.type) {
@@ -103,6 +120,20 @@ function GameBoard({ socket, roomId }) {
         />
         <button type="submit">Send</button>
       </form>
+
+      <button
+        onClick={handleLeave}
+        style={{
+          marginTop: "1rem",
+          backgroundColor: "#dc3545",
+          color: "white",
+          padding: "10px 20px",
+          border: "none",
+          borderRadius: "5px",
+        }}
+      >
+        離開房間
+      </button>
 
       <div
         style={{

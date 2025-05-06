@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"backend/helpers"
+	"fmt"
 	"log"
 	"sync"
 
@@ -42,7 +43,7 @@ func (h *Hub) MatchPlayer(player *Player) {
 		GameHub.Rooms[roomID] = room
 		player.RoomID = roomID
 		opponent.RoomID = roomID
-		room.CurrentTurnID = NextPlayer(room.Players, "")
+		NextPlayer(room, "")
 		roomMsg := Message{
 			Type: "roomJoined",
 			Payload: map[string]string{
@@ -61,5 +62,32 @@ func (h *Hub) MatchPlayer(player *Player) {
 		opponent.Send <- []byte(roomJSON)
 	} else {
 		h.MatchQueue = append(h.MatchQueue, player)
+	}
+}
+
+func (h *Hub) RemoveFormRoom(p *Player) {
+	h.Mutex.Lock()
+	defer h.Mutex.Unlock()
+
+	room, exist := h.Rooms[p.RoomID]
+	if !exist {
+		log.Printf("Room %s not found for player %s", p.RoomID, p.ID)
+		return
+	}
+	delete(room.Players, p.ID)
+	log.Printf("Player %s leave from room %s", p.ID, p.RoomID)
+	for _, other := range room.Players {
+		msg := Message{
+			Type:    "playerLeft",
+			Payload: fmt.Sprintf("Player %s has left the room", p.ID),
+			From:    "system",
+		}
+		if b, err := jsoniter.Marshal(msg); err == nil {
+			other.Send <- b
+		}
+	}
+	if len(room.Players) <= 2 {
+		delete(h.Rooms, room.ID)
+		log.Printf("Room %s deleted as it's now empty", room.ID)
 	}
 }
