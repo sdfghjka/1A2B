@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	jsoniter "github.com/json-iterator/go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -117,6 +118,27 @@ func checkExists(ctx context.Context, field string, value *string) (bool, error)
 		return false, fmt.Errorf("error checking %s: %w", field, err)
 	}
 	return count > 0, nil
+}
+
+func FindUserByID(ctx context.Context, uid string) (*models.User, error) {
+	redisKey := fmt.Sprintf("user:%s", uid)
+	val, err := database.Rdb.Get(ctx, redisKey).Result()
+	if err == nil {
+		var cachedUser models.User
+		if err := jsoniter.Unmarshal([]byte(val), &cachedUser); err == nil {
+			return &cachedUser, nil
+		}
+	}
+	var userInfo models.User
+	filter := bson.M{"user_id": uid}
+	err = userCollection.FindOne(ctx, filter).Decode(&userInfo)
+	if err != nil {
+		return nil, err
+	}
+	jsonBytes, _ := jsoniter.Marshal(userInfo)
+	database.Rdb.Set(ctx, redisKey, jsonBytes, 2*time.Hour)
+
+	return &userInfo, nil
 }
 
 func FindUsersByIDs(ctx context.Context, ids []string) (map[string]string, error) {

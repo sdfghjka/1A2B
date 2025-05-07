@@ -2,14 +2,37 @@ package websocket
 
 import (
 	"backend/helpers"
+	"backend/service"
+	"context"
 	"fmt"
 	"log"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
 func handleGuess(player *Player, guess string) {
-	room := GameHub.Rooms[player.RoomID]
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	userInfo, err := service.FindUserByID(ctx, player.ID)
+	if err != nil || userInfo == nil {
+		log.Printf("User not found or error: %v", err)
+		return
+	}
+	defer cancel()
+	first := ""
+	last := ""
+	if userInfo.First_name != nil {
+		first = *userInfo.First_name
+	}
+	if userInfo.Last_name != nil {
+		last = *userInfo.Last_name
+	}
+	playerName := first + last
+	room, ok := GameHub.Rooms[player.RoomID]
+	if !ok || room == nil {
+		log.Printf("Room %s not found for player %s", player.RoomID, player.ID)
+		return
+	}
 	if room.CurrentTurnID != player.ID {
 		msg := Message{
 			Type:    "system",
@@ -26,7 +49,7 @@ func handleGuess(player *Player, guess string) {
 		message := Message{
 			Type:    "gameOver",
 			Payload: fmt.Sprintf("Winner is %s", player.ID),
-			From:    player.ID,
+			From:    playerName,
 		}
 		JSON, _ := jsoniter.Marshal(message)
 		for _, p := range room.Players {
@@ -38,7 +61,7 @@ func handleGuess(player *Player, guess string) {
 	message := Message{
 		Type:    "guessResult",
 		Payload: guess + "➜" + response,
-		From:    player.ID,
+		From:    playerName,
 	}
 	jsonData, err := jsoniter.Marshal(message)
 	if err != nil {
@@ -49,17 +72,23 @@ func handleGuess(player *Player, guess string) {
 		p.Send <- []byte(jsonData)
 	}
 	NextPlayer(room, player.ID)
-	// turnMessage := Message{
-	// 	Type:    "system",
-	// 	Payload: fmt.Sprintf("現在輪到 %s 猜", room.CurrentTurnID),
-	// }
-	// turnData, _ := jsoniter.Marshal(turnMessage)
-	// for _, p := range room.Players {
-	// 	p.Send <- turnData
-	// }
 }
 
 func handleChat(player *Player, text string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	userInfo, _ := service.FindUserByID(ctx, player.ID)
+	defer cancel()
+
+	first := ""
+	last := ""
+	if userInfo.First_name != nil {
+		first = *userInfo.First_name
+	}
+	if userInfo.Last_name != nil {
+		last = *userInfo.Last_name
+	}
+	playerName := first + last
+
 	room := GameHub.Rooms[player.RoomID]
 	if room == nil {
 		return
@@ -67,7 +96,7 @@ func handleChat(player *Player, text string) {
 	message := Message{
 		Type:    "chat",
 		Payload: text,
-		From:    player.ID,
+		From:    playerName,
 	}
 	jsonData, err := jsoniter.Marshal(message)
 	if err != nil {
