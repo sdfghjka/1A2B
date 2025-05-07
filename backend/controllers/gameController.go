@@ -78,7 +78,8 @@ func Guess() gin.HandlerFunc {
 
 		val, _ := jsoniter.Marshal(user)
 		database.Rdb.Set(database.Ctx, userId, val, 5*time.Minute)
-		c.JSON(http.StatusOK, gin.H{"result": helpers.CheckResult(result), "guess": body.Guess})
+		msg, _ := helpers.CheckResult(result)
+		c.JSON(http.StatusOK, gin.H{"result": msg, "guess": body.Guess})
 	}
 }
 

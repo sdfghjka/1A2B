@@ -4,7 +4,6 @@ import (
 	"backend/helpers"
 	"fmt"
 	"log"
-	"strconv"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -22,9 +21,23 @@ func handleGuess(player *Player, guess string) {
 	}
 	answer := room.Answer
 	result := helpers.CheckAnswer(answer, guess)
+	response, IsWin := helpers.CheckResult(result)
+	if IsWin {
+		message := Message{
+			Type:    "gameOver",
+			Payload: fmt.Sprintf("Winner is %s", player.ID),
+			From:    player.ID,
+		}
+		JSON, _ := jsoniter.Marshal(message)
+		for _, p := range room.Players {
+			p.Send <- JSON
+			GameHub.RemoveFormRoom(p)
+		}
+
+	}
 	message := Message{
 		Type:    "guessResult",
-		Payload: guess + "  " + strconv.Itoa(result.A) + "A" + strconv.Itoa(result.B) + "B",
+		Payload: guess + "➜" + response,
 		From:    player.ID,
 	}
 	jsonData, err := jsoniter.Marshal(message)
@@ -36,14 +49,14 @@ func handleGuess(player *Player, guess string) {
 		p.Send <- []byte(jsonData)
 	}
 	NextPlayer(room, player.ID)
-	turnMessage := Message{
-		Type:    "system",
-		Payload: fmt.Sprintf("現在輪到 %s 猜", room.CurrentTurnID),
-	}
-	turnData, _ := jsoniter.Marshal(turnMessage)
-	for _, p := range room.Players {
-		p.Send <- turnData
-	}
+	// turnMessage := Message{
+	// 	Type:    "system",
+	// 	Payload: fmt.Sprintf("現在輪到 %s 猜", room.CurrentTurnID),
+	// }
+	// turnData, _ := jsoniter.Marshal(turnMessage)
+	// for _, p := range room.Players {
+	// 	p.Send <- turnData
+	// }
 }
 
 func handleChat(player *Player, text string) {

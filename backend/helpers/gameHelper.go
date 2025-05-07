@@ -22,11 +22,12 @@ func GenerateAnswer() string {
 	return answer
 }
 
-func CheckResult(result models.Result) string {
+func CheckResult(result models.Result) (string, bool) {
+	IsWin := false
 	if result.A == 4 {
-		return "Congratulations, you won the game!"
+		return "Congratulations, you won the game!", true
 	}
-	return fmt.Sprintf("%dA%dB", result.A, result.B)
+	return fmt.Sprintf("%dA%dB", result.A, result.B), IsWin
 }
 func CheckAnswer(answer, guess string) models.Result {
 	if len(answer) != len(guess) {

@@ -11,8 +11,6 @@ function AuthCallback() {
     if (token) {
       localStorage.setItem("token", token);
       navigate("/gamestart");
-    } else {
-      alert(token);
     }
   }, [navigate]);
 

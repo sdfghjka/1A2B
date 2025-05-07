@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ClipLoader } from "react-spinners"; // 載入 Spinner 動畫
 import GameBoard from "./GameBoard";
 
 function GameRoomPage() {
@@ -28,16 +29,19 @@ function GameRoomPage() {
   }, []);
 
   return (
-    <div>
-      <h2>多人對戰房間</h2>
+    <div style={{ textAlign: "center", padding: "20px" }}>
       {roomJoined && socket ? (
         <GameBoard socket={socket} roomId={roomId} />
       ) : (
-        <p>等待配對中...</p>
+        <div>
+          <p>等待配對中...</p>
+          <ClipLoader size={50} color={"#36d7b7"} loading={!roomJoined} />
+        </div>
       )}
     </div>
   );
 }
 
 export default GameRoomPage;
+
 
