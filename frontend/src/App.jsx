@@ -1,13 +1,24 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
-function App() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // 處理註冊成功訊息
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      // 清除 state，避免重整還顯示
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,14 +40,10 @@ function App() {
       const data = await response.json();
 
       if (response.ok) {
-        // 登入成功，將 token 儲存到 localStorage 或 sessionStorage
-        localStorage.setItem("token", data.token); // 儲存 token
-        localStorage.setItem("user", JSON.stringify(data)); // 儲存用戶資料
-
-        // 跳轉到遊戲開始頁面
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data));
         navigate("/gamestart");
       } else {
-        // 登入失敗，顯示錯誤訊息
         setErrorMessage(data.error || "登入失敗，請檢查帳號和密碼");
       }
     } catch (error) {
@@ -57,7 +64,12 @@ function App() {
       <div className="card p-4 shadow text-center" style={{ width: "400px" }}>
         <h2 className="mb-3">登入</h2>
 
-        {/* 顯示錯誤訊息 */}
+        {/* 成功註冊提示 */}
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
+        )}
+
+        {/* 錯誤訊息 */}
         {errorMessage && (
           <div className="alert alert-danger" role="alert">
             {errorMessage}
@@ -91,15 +103,16 @@ function App() {
         </form>
 
         <div className="mt-3">
+          <p>還沒有帳號？<Link to="/signup">註冊</Link></p>
           <p>或使用其他方式登入</p>
           <div className="d-grid gap-2">
-            <button 
+            <button
               className="btn btn-outline-primary d-flex align-items-center justify-content-center"
               onClick={handleFacebookLogin}
             >
               <FaFacebook size={20} className="me-2" /> 使用 Facebook 登入
             </button>
-            <button 
+            <button
               className="btn btn-outline-danger d-flex align-items-center justify-content-center"
               onClick={handleGoogleLogin}
             >
@@ -112,4 +125,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;

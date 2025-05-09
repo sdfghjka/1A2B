@@ -142,3 +142,23 @@ func GetUser() gin.HandlerFunc {
 		c.JSON(http.StatusOK, user)
 	}
 }
+
+func GetInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		email := c.GetString("email")
+		firstName := c.GetString("first_name")
+		lastName := c.GetString("last_name")
+		id := c.GetString("uid")
+		userType := c.GetString("user_type")
+		user := models.User{
+			User_id:    id,
+			Email:      &email,
+			First_name: &firstName,
+			Last_name:  &lastName,
+			User_type:  &userType,
+		}
+
+		c.JSON(http.StatusOK, user)
+
+	}
+}
