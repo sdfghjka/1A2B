@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package image;
+
+option go_package = "./proto;image";
+
+service ImageUploader {
+  rpc UploadImage (UploadImageRequest) returns (UploadImageResponse);
+}
+
+message UploadImageRequest {
+  bytes image_data = 1;     // 圖片資料（以 byte stream 傳）
+  string filename = 2;      // 檔名
+}
+
+message UploadImageResponse {
+  string image_url = 1;     // 上傳後的圖片網址
+}

@@ -20,4 +20,5 @@ type User struct {
 	Updated_at    time.Time          `bson:"updated_at" json:"updated_at"`
 	User_id       string             `bson:"user_id" json:"user_id"`
 	Provider      string             `bson:"provider" json:"provider" validate:"required,oneof=Google Local"`
+	ImageURL      string             `bson:"image_url" json:"image_url"`
 }

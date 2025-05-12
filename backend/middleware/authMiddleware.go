@@ -35,7 +35,7 @@ func Authenticate() gin.HandlerFunc {
 		c.Set("last_name", claims.Last_name)
 		c.Set("uid", claims.Uid)
 		c.Set("user_type", claims.User_type)
-
+		// c.Set("image_url",claims.)
 		c.Next()
 	}
 }

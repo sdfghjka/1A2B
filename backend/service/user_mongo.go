@@ -170,4 +170,28 @@ func FindUsersByIDs(ctx context.Context, ids []string) (map[string]string, error
 	return result, nil
 }
 
+func UpdateInfo(ctx context.Context, searchField string, searchValue string, updateField string, newInfo string) error {
+	exists, err := checkExists(ctx, searchField, &searchValue)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("document with %s=%s not found", searchField, searchValue)
+	}
+
+	filter := bson.M{searchField: searchValue}
+	update := bson.M{
+		"$set": bson.M{
+			updateField: newInfo,
+		},
+	}
+
+	_, err = userCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // func ListUsers(page int, recordPerPage int) ([]models.User, int, error)

@@ -17,4 +17,5 @@ func UserRouters(incomingrouters *gin.RouterGroup) {
 	users.GET("/leaderboard", controllers.GetRank())
 	users.GET("/game/random", controllers.GenerateAnswer())
 	users.POST("/game/guess", controllers.Guess())
+	users.POST("/upload/image", controllers.UploadUserImage)
 }

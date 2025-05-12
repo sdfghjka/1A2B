@@ -1,0 +1,26 @@
+{
+  "name": "image-service",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start-http": "node server.js",
+    "start-grpc": "node grpc-server.js",
+    "start": "concurrently \"npm run start-http\" \"npm run start-grpc\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.3",
+    "@grpc/proto-loader": "^0.7.15",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "imgur": "^1.0.2",
+    "multer": "^1.4.5-lts.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
