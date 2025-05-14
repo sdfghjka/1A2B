@@ -34,8 +34,7 @@ cd ../backend
 docker-compose up --build
 
 
-## Screenshots
-
+## Screenshot
 ![Login Page](./screenshots/login.png)  
 ![Game UI](./screenshots/game-ui.png)  
 ![Multiplayer Chat](./screenshots/chat.png)
