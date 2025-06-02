@@ -2,8 +2,10 @@ package websocket
 
 import (
 	"backend/helpers"
+	"backend/models"
 	"backend/service"
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -14,11 +16,11 @@ import (
 func handleGuess(player *Player, guess string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	userInfo, err := service.FindUserByID(ctx, player.ID)
+	defer cancel()
 	if err != nil || userInfo == nil {
 		log.Printf("User not found or error: %v", err)
 		return
 	}
-	defer cancel()
 	first := ""
 	last := ""
 	if userInfo.First_name != nil {
@@ -56,6 +58,15 @@ func handleGuess(player *Player, guess string) {
 			p.Send <- JSON
 			GameHub.RemoveFormRoom(p)
 		}
+		room.InsertOnce.Do(func() {
+			winner := player.ID
+			match := models.GameMatch{
+				Player1UID: room.Player1ID,
+				Player2UID: room.Player2ID,
+				WinnerUID:  sql.NullString{String: winner, Valid: true},
+			}
+			player.GameService.InsertGameRecord(match)
+		})
 
 	}
 	message := Message{

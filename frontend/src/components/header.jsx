@@ -69,13 +69,13 @@ function Header() {
                       </button>
                     </Link>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link to="/restaurants/create">
                       <button className="btn btn-outline-info my-2 mx-1">
                         新增餐廳
                       </button>
                     </Link>
-                  </li>
+                  </li> */}
                   <li className="nav-item">
                     <button
                       onClick={handleLogout}

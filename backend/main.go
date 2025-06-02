@@ -28,10 +28,11 @@ func main() {
 	}
 	router := gin.New()
 	db := database.MysqlDB()
+	GameService := service.NewGameService(db)
 	defer db.Close()
 	database.InitRedis()
 	service.InitOAuthProviders()
-	router.GET("/api/ws", controllers.JoinRoomHandler)
+	router.GET("/api/ws", controllers.JoinRoomHandler(GameService))
 	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},

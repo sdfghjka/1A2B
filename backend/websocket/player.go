@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"backend/service"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -8,10 +9,11 @@ import (
 )
 
 type Player struct {
-	ID     string
-	Conn   *websocket.Conn
-	RoomID string
-	Send   chan []byte
+	ID          string
+	Conn        *websocket.Conn
+	RoomID      string
+	Send        chan []byte
+	GameService service.GameService
 }
 
 type Message struct {

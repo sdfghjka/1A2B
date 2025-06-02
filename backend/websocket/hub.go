@@ -32,14 +32,14 @@ func (h *Hub) MatchPlayer(player *Player) {
 		roomID := helpers.GenerateRandomPassword(6)
 		log.Println(roomID)
 		room := &Room{
-			ID:      roomID,
-			Players: make(map[string]*Player),
-			Answer:  helpers.GenerateAnswer(),
+			ID:        roomID,
+			Players:   make(map[string]*Player),
+			Answer:    helpers.GenerateAnswer(),
+			Player1ID: opponent.ID,
+			Player2ID: player.ID,
 		}
 		room.Players[player.ID] = player
-		log.Println(player.ID)
 		room.Players[opponent.ID] = opponent
-		log.Println(opponent.ID)
 		GameHub.Rooms[roomID] = room
 		player.RoomID = roomID
 		opponent.RoomID = roomID
@@ -51,6 +51,7 @@ func (h *Hub) MatchPlayer(player *Player) {
 			},
 			From: player.ID,
 		}
+		log.Println(room.Answer)
 		roomJSON, err := jsoniter.Marshal(roomMsg)
 		if err != nil {
 			log.Println("Failed to marshal roomJoined:", err)
@@ -75,7 +76,6 @@ func (h *Hub) RemoveFormRoom(p *Player) {
 		return
 	}
 	delete(room.Players, p.ID)
-	log.Printf("Player %s leave from room %s", p.ID, p.RoomID)
 	for _, other := range room.Players {
 		msg := Message{
 			Type:    "playerLeft",

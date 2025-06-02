@@ -21,6 +21,12 @@ A real-time web-based 1A2B (Bulls and Cows) game with both single-player and onl
 - Game history stored in MySQL
 - Backend containerized using Docker
 
+## Screenshots
+
+![Login Page](./screenshots/login.png)  
+![Game UI](./screenshots/game-ui.png)  
+![Multiplayer Chat](./screenshots/chat.png)
+
 ## Getting Started
 
 ```bash
@@ -34,8 +40,6 @@ cd ../backend
 docker-compose up --build
 
 
-## Screenshots
 
-![Login Page](./screenshots/login.png)  
-![Game UI](./screenshots/game-ui.png)  
-![Multiplayer Chat](./screenshots/chat.png)
+
+```

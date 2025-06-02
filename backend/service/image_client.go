@@ -14,13 +14,10 @@ import (
 )
 
 func UploadImageToImageService(filePath string) (string, error) {
-	// 讀取圖片
 	imageData, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("讀檔錯誤: %v", err)
 	}
-
-	// 建立 gRPC client 連線（使用新版 API）
 	conn, err := grpc.Dial("host.docker.internal:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return "", fmt.Errorf("建立 gRPC 連線失敗: %v", err)
@@ -29,7 +26,6 @@ func UploadImageToImageService(filePath string) (string, error) {
 
 	client := pb.NewImageUploaderClient(conn)
 
-	// 建立 context 與發送請求
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
