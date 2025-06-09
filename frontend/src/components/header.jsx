@@ -24,13 +24,12 @@ function Header() {
         <div className="container">
           <Link className="navbar-brand" to="/">
             <img
-              src="https://assets-lighthouse.s3.amazonaws.com/uploads/image/file/6227/restaurant-list-logo.png"
+              // src="https://assets-lighthouse.s3.amazonaws.com/uploads/image/file/6227/restaurant-list-logo.png"
               width="30"
               height="30"
               className="d-inline-block align-top"
-              alt="Hub"
+              alt=""
             />
-            Hub
           </Link>
 
           {user && (

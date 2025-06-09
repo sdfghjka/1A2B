@@ -52,9 +52,9 @@ func (s *userService) InsertUser(M models.RankedUser) error {
 
 func (s *userService) GetRankedUsers(ctx context.Context) ([]models.RankedUser, error) {
 	type scoreRow struct {
-		ID    string
-		Time  float64
-		Count int
+		ID    string  `db:"uid"`
+		Time  float64 `db:"time"`
+		Count int     `db:"count"`
 	}
 	var scores []scoreRow
 	err := s.DB.Select(&scores, "SELECT uid, time, count FROM game_users ORDER BY count ASC, time ASC;")

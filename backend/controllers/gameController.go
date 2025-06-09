@@ -6,8 +6,10 @@ import (
 	"backend/helpers"
 	"backend/models"
 	"backend/service"
+	ws "backend/websocket"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -94,4 +96,21 @@ func GetRank() gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, user)
 	}
+}
+
+func AIVersionConnect(c *gin.Context) {
+	Id := c.GetString("uid")
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade failed:", err)
+		return
+	}
+	play := &ws.Player{
+		ID:   Id,
+		Conn: conn,
+		Send: make(chan []byte, 256),
+	}
+	go play.ReadMessages()
+	go play.WriteMessages()
+
 }

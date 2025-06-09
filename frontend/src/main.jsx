@@ -12,6 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ProfilePage from './ProfilePage.jsx';
 import { UserProvider } from "./contexts/UserContext";
 import AdminUserList from './users/AdminUserList.jsx';
+import GameAIVersion from './game/GameAIVersion.jsx';
 // 正確渲染並處理路由
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/login" element={<App />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/gamestart" element={<StartPage />} />
+          <Route path="/game/ai" element={<GameAIVersion/>} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/multiplayer" element={<GameRoomPage />} />
