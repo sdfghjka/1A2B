@@ -14,6 +14,7 @@ import (
 )
 
 func handleGuess(player *Player, guess string) {
+	log.Println(guess)
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	userInfo, err := service.FindUserByID(ctx, player.ID)
 	defer cancel()

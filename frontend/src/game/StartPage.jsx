@@ -27,27 +27,26 @@ function StartPage() {
     }
   };
 
-  const startVsAI = async () => {
+  const startVsAI = () => {
     const token = localStorage.getItem("token");
-    try {
-      const res = await fetch("http://localhost:3000/api/ai/start", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        navigate(`/game/ai`);
-      } else {
-        alert(data.error || "發生錯誤，請稍後再試");
-      }
-    } catch (err) {
-      alert(err.message || "連線失敗");
+    if (!token) {
+      alert("請先登入");
+      return;
     }
+
+    const socket = new WebSocket(
+      `ws://localhost:3000/api/ai/start?token=${token}`
+    );
+
+    socket.onopen = () => {
+      console.log("WebSocket opened for AI game");
+      navigate("/game/ai");
+    };
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error:", err);
+      alert("WebSocket 連線失敗");
+    };
   };
 
   const goToMultiplayer = () => {

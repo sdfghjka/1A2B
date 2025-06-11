@@ -13,7 +13,7 @@ function GameAIVersion({ socket }) {
     e.preventDefault();
     if (guess.length !== 4 || isNaN(guess)) return;
     setLoading(true);
-    socket.send(JSON.stringify({ type: "playerGuess", payload: guess }));
+    socket.current.send(JSON.stringify({ type: "playerGuess", payload: guess }));
     setGuess("");
   };
 
@@ -96,7 +96,6 @@ function GameAIVersion({ socket }) {
         gap: "30px",
       }}
     >
-      {/* 遊戲主體 */}
       <div
         style={{
           backgroundColor: "white",

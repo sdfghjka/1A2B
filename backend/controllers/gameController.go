@@ -98,19 +98,50 @@ func GetRank() gin.HandlerFunc {
 	}
 }
 
-func AIVersionConnect(c *gin.Context) {
-	Id := c.GetString("uid")
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		log.Println("WebSocket upgrade failed:", err)
-		return
+func StartAIGameHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		log.Println(11111111111111)
+		token := c.Query("token")
+		claim, msg := helpers.ValidateToken(token)
+		if msg != "" {
+			log.Println("Token validation failed:", msg)
+			c.Writer.WriteHeader(http.StatusUnauthorized)
+			c.Writer.Write([]byte("Unauthorized"))
+			return
+		}
+		log.Println(11111111111111)
+		playerID := claim.Uid
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+		if err != nil {
+			log.Println("WebSocket upgrade failed:", err)
+			return
+		}
+		roomID := helpers.GenerateRandomPassword(6)
+		//init player
+		player := &ws.Player{
+			ID:     playerID,
+			Conn:   conn,
+			RoomID: roomID,
+			Send:   make(chan []byte, 256),
+		}
+		//init AI
+		AI := &ws.Player{
+			ID:     "AI",
+			RoomID: roomID,
+		}
+		room := &ws.Room{
+			ID:        roomID,
+			Players:   make(map[string]*ws.Player),
+			Answer:    helpers.GenerateAnswer(),
+			Player1ID: player.ID,
+			Player2ID: AI.ID, // 指定對手為 AI
+		}
+		ws.GameHub.Rooms[roomID] = room
+		room.Players[player.ID] = player
+		room.Players[AI.ID] = AI
+		log.Println("WebSocket connection established for player:", playerID)
+		go player.ReadMessages()
+		go player.WriteMessages()
+		ws.NextPlayer(room, "")
 	}
-	play := &ws.Player{
-		ID:   Id,
-		Conn: conn,
-		Send: make(chan []byte, 256),
-	}
-	go play.ReadMessages()
-	go play.WriteMessages()
-
 }
