@@ -9,7 +9,6 @@ import (
 )
 
 func UserRouters(incomingrouters *gin.RouterGroup) {
-	incomingrouters.GET("/ai/start", controllers.StartAIGameHandler())
 	users := incomingrouters.Group("/users")
 	users.Use(middleware.Authenticate())
 	users.GET("/admin", controllers.GetUsers())

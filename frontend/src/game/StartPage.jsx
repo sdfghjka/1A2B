@@ -40,7 +40,7 @@ function StartPage() {
 
     socket.onopen = () => {
       console.log("WebSocket opened for AI game");
-      navigate("/game/ai");
+      navigate("/multiplayer?mode=ai");
     };
 
     socket.onerror = (err) => {

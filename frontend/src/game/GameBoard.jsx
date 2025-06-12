@@ -7,24 +7,25 @@ function GameBoard({ socket, roomId }) {
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [systemMessages, setSystemMessages] = useState([]);
-  const [loading, setLoading] = useState(false); // 用來控制加載狀態
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (guess.length !== 4 || isNaN(guess)) return;
-    setLoading(true);  // 設定為加載中
+    if (!socket) return; 
+    setLoading(true);
     socket.send(JSON.stringify({ type: "guess", payload: guess }));
     setGuess("");
   };
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
-    if (chatInput.trim()) {
-      setLoading(true); // 設定為加載中
-      socket.send(JSON.stringify({ type: "chat", payload: chatInput }));
-      setChatInput("");
-    }
+    if (!chatInput.trim()) return;
+    if (!socket) return; // 防呆檢查
+    setLoading(true);
+    socket.send(JSON.stringify({ type: "chat", payload: chatInput }));
+    setChatInput("");
   };
 
   const handleLeave = () => {
@@ -36,7 +37,10 @@ function GameBoard({ socket, roomId }) {
   };
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.warn("❗ socket 尚未初始化！");
+      return;
+    }
 
     socket.onmessage = (event) => {
       const msg = JSON.parse(event.data);
@@ -54,7 +58,7 @@ function GameBoard({ socket, roomId }) {
         setSystemMessages((prev) => [...prev, msg]);
       }
 
-      setLoading(false); // 收到回應後停止加載
+      setLoading(false); // 收到訊息後停止 loading
     };
 
     return () => {
@@ -67,7 +71,7 @@ function GameBoard({ socket, roomId }) {
       case "guessResult":
         return (
           <p key={index}>
-            🧠 <strong>{msg.from}</strong> guessed {" "}
+            🧠 <strong>{msg.from}</strong> guessed{" "}
             <span style={{ color: "green" }}>{msg.payload}</span>
           </p>
         );
@@ -255,4 +259,5 @@ function GameBoard({ socket, roomId }) {
 }
 
 export default GameBoard;
+
 

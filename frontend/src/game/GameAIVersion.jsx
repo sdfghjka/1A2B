@@ -13,7 +13,7 @@ function GameAIVersion({ socket }) {
     e.preventDefault();
     if (guess.length !== 4 || isNaN(guess)) return;
     setLoading(true);
-    socket.current.send(JSON.stringify({ type: "playerGuess", payload: guess }));
+    socket.send(JSON.stringify({ type: "guess", payload: guess }));
     setGuess("");
   };
 
@@ -56,22 +56,23 @@ function GameAIVersion({ socket }) {
 
   const renderSystemMessage = (msg, index) => {
     switch (msg.type) {
-      case "playerResult":
+      case "guessResult":
         return (
           <p key={index}>
-            🧠 你猜 <strong>{msg.payload.guess}</strong> ➜ 結果：{msg.payload.result}
+            🧠 <strong>{msg.from}</strong> guessed{" "}
+            <span style={{ color: "green" }}>{msg.payload}</span>
           </p>
         );
-      case "aiResult":
+      case "roomJoined":
         return (
-          <p key={index}>
-            🤖 電腦猜 <strong>{msg.payload.guess}</strong> ➜ 結果：{msg.payload.result}
+          <p key={index} style={{ color: "purple" }}>
+            🔗 <strong>{msg.from}</strong> joined room <strong>{msg.payload.roomId}</strong>
           </p>
         );
       case "gameOver":
         return (
           <p key={index} style={{ color: "red" }}>
-            🎉 遊戲結束：{msg.payload}
+            🎉 Game Over: {msg.payload}
           </p>
         );
       case "system":

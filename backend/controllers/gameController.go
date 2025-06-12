@@ -139,6 +139,14 @@ func StartAIGameHandler() gin.HandlerFunc {
 		ws.GameHub.Rooms[roomID] = room
 		room.Players[player.ID] = player
 		room.Players[AI.ID] = AI
+		joinMsg := ws.Message{
+			Type: "roomJoined",
+			Payload: map[string]interface{}{
+				"roomId": roomID,
+			},
+		}
+		joinMsgJSON, _ := jsoniter.Marshal(joinMsg)
+		player.Send <- joinMsgJSON
 		log.Println("WebSocket connection established for player:", playerID)
 		go player.ReadMessages()
 		go player.WriteMessages()

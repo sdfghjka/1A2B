@@ -25,6 +25,7 @@ type Message struct {
 }
 
 func (p *Player) ReadMessages() {
+	log.Println("ReadMessage function")
 	defer func() {
 		log.Printf("Player %s disconnected", p.ID)
 		GameHub.RemoveFormRoom(p)

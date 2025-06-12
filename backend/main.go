@@ -40,10 +40,10 @@ func main() {
 	defer db.Close()
 	database.InitRedis()
 	service.InitOAuthProviders()
-	router.GET("/api/ws", controllers.JoinRoomHandler(GameService))
-
-	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	api := router.Group("/api")
+	api.GET("/ws", controllers.JoinRoomHandler(GameService))
+	api.GET("/ai/start", controllers.StartAIGameHandler())
+	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	api.POST("/payment", controllers.Payment)
 	routers.AuthRouters(api)
 	routers.UserRouters(api)

@@ -23,7 +23,6 @@ createRoot(document.getElementById('root')).render(
           <Route path="/login" element={<App />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/gamestart" element={<StartPage />} />
-          <Route path="/game/ai" element={<GameAIVersion/>} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/multiplayer" element={<GameRoomPage />} />
