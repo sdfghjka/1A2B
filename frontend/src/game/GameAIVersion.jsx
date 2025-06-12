@@ -40,6 +40,7 @@ function GameAIVersion({ socket }) {
         case "aiResult":
         case "gameOver":
         case "system":
+        case "guessResult": 
           setSystemMessages((prev) => [...prev, msg]);
           break;
         default:
@@ -66,7 +67,8 @@ function GameAIVersion({ socket }) {
       case "roomJoined":
         return (
           <p key={index} style={{ color: "purple" }}>
-            🔗 <strong>{msg.from}</strong> joined room <strong>{msg.payload.roomId}</strong>
+            🔗 <strong>{msg.from}</strong> joined room{" "}
+            <strong>{msg.payload.roomId}</strong>
           </p>
         );
       case "gameOver":
@@ -107,7 +109,9 @@ function GameAIVersion({ socket }) {
           width: "400px",
         }}
       >
-        <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>1A2B 遊戲（對戰電腦）</h1>
+        <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
+          1A2B 遊戲（對戰電腦）
+        </h1>
 
         {aiGuess && (
           <div style={{ marginBottom: "10px", color: "#666" }}>

@@ -14,23 +14,28 @@ import (
 )
 
 func handleGuess(player *Player, guess string) {
-	log.Println(guess)
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
-	userInfo, err := service.FindUserByID(ctx, player.ID)
-	defer cancel()
-	if err != nil || userInfo == nil {
-		log.Printf("User not found or error: %v", err)
-		return
+	log.Println(player.ID + ":" + guess)
+	playerName := ""
+	if player.ID == "AI" {
+		playerName = "🤖 AI"
+	} else {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		userInfo, err := service.FindUserByID(ctx, player.ID)
+		defer cancel()
+		if err != nil || userInfo == nil {
+			log.Printf("User not found or error: %v", err)
+			return
+		}
+		first := ""
+		last := ""
+		if userInfo.First_name != nil {
+			first = *userInfo.First_name
+		}
+		if userInfo.Last_name != nil {
+			last = *userInfo.Last_name
+		}
+		playerName = first + last
 	}
-	first := ""
-	last := ""
-	if userInfo.First_name != nil {
-		first = *userInfo.First_name
-	}
-	if userInfo.Last_name != nil {
-		last = *userInfo.Last_name
-	}
-	playerName := first + last
 	room, ok := GameHub.Rooms[player.RoomID]
 	if !ok || room == nil {
 		log.Printf("Room %s not found for player %s", player.RoomID, player.ID)
@@ -81,7 +86,9 @@ func handleGuess(player *Player, guess string) {
 		return
 	}
 	for _, p := range room.Players {
-		p.Send <- []byte(jsonData)
+		if p.ID != "AI" {
+			p.Send <- []byte(jsonData)
+		}
 	}
 	NextPlayer(room, player.ID)
 }

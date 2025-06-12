@@ -1,10 +1,8 @@
 package websocket
 
 import (
-	"backend/helpers"
 	"backend/service"
 	"log"
-	"time"
 
 	"github.com/gorilla/websocket"
 	jsoniter "github.com/json-iterator/go"
@@ -31,7 +29,6 @@ func (p *Player) ReadMessages() {
 		GameHub.RemoveFormRoom(p)
 		p.Conn.Close()
 	}()
-	room := GameHub.Rooms[p.RoomID]
 	for {
 		_, msg, err := p.Conn.ReadMessage()
 		if err != nil {
@@ -52,13 +49,6 @@ func (p *Player) ReadMessages() {
 			var guessStr string
 			if err := jsoniter.Unmarshal(raw.Payload, &guessStr); err == nil {
 				handleGuess(p, guessStr)
-				if room.Player2ID == "AI" && room.CurrentTurnID == "AI" {
-					go func() {
-						time.Sleep(10 * time.Second)
-						aiGuess := helpers.GenerateAnswer()
-						handleGuess(room.Players["AI"], aiGuess)
-					}()
-				}
 			}
 		case "chat":
 			var chatText string

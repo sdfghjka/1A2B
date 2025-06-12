@@ -100,7 +100,6 @@ func GetRank() gin.HandlerFunc {
 
 func StartAIGameHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Println(11111111111111)
 		token := c.Query("token")
 		claim, msg := helpers.ValidateToken(token)
 		if msg != "" {
@@ -109,7 +108,6 @@ func StartAIGameHandler() gin.HandlerFunc {
 			c.Writer.Write([]byte("Unauthorized"))
 			return
 		}
-		log.Println(11111111111111)
 		playerID := claim.Uid
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
@@ -128,13 +126,14 @@ func StartAIGameHandler() gin.HandlerFunc {
 		AI := &ws.Player{
 			ID:     "AI",
 			RoomID: roomID,
+			Send:   make(chan []byte, 256),
 		}
 		room := &ws.Room{
 			ID:        roomID,
 			Players:   make(map[string]*ws.Player),
 			Answer:    helpers.GenerateAnswer(),
 			Player1ID: player.ID,
-			Player2ID: AI.ID, // 指定對手為 AI
+			Player2ID: AI.ID,
 		}
 		ws.GameHub.Rooms[roomID] = room
 		room.Players[player.ID] = player
