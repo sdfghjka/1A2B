@@ -134,6 +134,7 @@ func StartAIGameHandler() gin.HandlerFunc {
 			Answer:    helpers.GenerateAnswer(),
 			Player1ID: player.ID,
 			Player2ID: AI.ID,
+			AI_Answer: helpers.GenerateAllAnswer(),
 		}
 		ws.GameHub.Rooms[roomID] = room
 		room.Players[player.ID] = player

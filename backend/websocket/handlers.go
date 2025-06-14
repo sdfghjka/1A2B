@@ -17,7 +17,7 @@ func handleGuess(player *Player, guess string) {
 	log.Println(player.ID + ":" + guess)
 	playerName := ""
 	if player.ID == "AI" {
-		playerName = "🤖 AI"
+		playerName = "Computer"
 	} else {
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 		userInfo, err := service.FindUserByID(ctx, player.ID)
@@ -52,11 +52,12 @@ func handleGuess(player *Player, guess string) {
 	}
 	answer := room.Answer
 	result := helpers.CheckAnswer(answer, guess)
+	room.AI_Answer = helpers.FilterPossibleAnswers(room.AI_Answer, guess, result)
 	response, IsWin := helpers.CheckResult(result)
 	if IsWin {
 		message := Message{
 			Type:    "gameOver",
-			Payload: fmt.Sprintf("Winner is %s", player.ID),
+			Payload: fmt.Sprintf("Winner is %s,and Answer is %d", player.ID, room.Answer),
 			From:    playerName,
 		}
 		JSON, _ := jsoniter.Marshal(message)
@@ -73,6 +74,7 @@ func handleGuess(player *Player, guess string) {
 			}
 			player.GameService.InsertGameRecord(match)
 		})
+		return
 
 	}
 	message := Message{

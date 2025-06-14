@@ -9,5 +9,6 @@ type Room struct {
 	CurrentTurnID string
 	Player1ID     string
 	Player2ID     string
+	AI_Answer     []string
 	InsertOnce    sync.Once
 }

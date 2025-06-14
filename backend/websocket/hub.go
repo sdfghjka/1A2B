@@ -86,7 +86,7 @@ func (h *Hub) RemoveFormRoom(p *Player) {
 			other.Send <- b
 		}
 	}
-	if len(room.Players) <= 2 {
+	if len(room.Players) == 2 {
 		delete(h.Rooms, room.ID)
 		log.Printf("Room %s deleted as it's now empty", room.ID)
 	}

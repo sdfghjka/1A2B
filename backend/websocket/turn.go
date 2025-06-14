@@ -48,8 +48,12 @@ func NextPlayer(room *Room, currentPlayer string) {
 	if room.CurrentTurnID == "AI" {
 		log.Println("AI is thinking...")
 		go func() {
-			time.Sleep(2 * time.Second)
+			time.Sleep(7 * time.Second)
 			aiGuess := helpers.GenerateAnswer()
+			if len(room.AI_Answer) != 0 {
+				aiGuess = room.AI_Answer[rand.IntN(len(room.AI_Answer))]
+			}
+
 			aiMessage := Message{
 				Type: "aiGuess",
 				Payload: map[string]string{
