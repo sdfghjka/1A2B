@@ -42,7 +42,7 @@ func main() {
 	service.InitOAuthProviders()
 	api := router.Group("/api")
 	api.GET("/ws", controllers.JoinRoomHandler(GameService))
-	api.GET("/ai/start", controllers.StartAIGameHandler())
+	api.GET("/ai/start", controllers.StartAIGameHandler(GameService))
 	router.Use(gin.Logger(), middleware.ErrorHandler(), middleware.InjectUserService(db))
 	api.POST("/payment", controllers.Payment)
 	routers.AuthRouters(api)

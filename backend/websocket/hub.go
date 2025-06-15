@@ -32,11 +32,12 @@ func (h *Hub) MatchPlayer(player *Player) {
 		roomID := helpers.GenerateRandomPassword(6)
 		log.Println(roomID)
 		room := &Room{
-			ID:        roomID,
-			Players:   make(map[string]*Player),
-			Answer:    helpers.GenerateAnswer(),
-			Player1ID: opponent.ID,
-			Player2ID: player.ID,
+			ID:         roomID,
+			Players:    make(map[string]*Player),
+			Answer:     helpers.GenerateAnswer(),
+			Player1ID:  opponent.ID,
+			Player2ID:  player.ID,
+			InsertOnce: sync.Once{},
 		}
 		room.Players[player.ID] = player
 		room.Players[opponent.ID] = opponent

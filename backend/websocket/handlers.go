@@ -14,6 +14,14 @@ import (
 )
 
 func handleGuess(player *Player, guess string) {
+	GameHub.Mutex.Lock()
+	room, ok := GameHub.Rooms[player.RoomID]
+	GameHub.Mutex.Unlock()
+
+	if !ok || room == nil {
+		log.Printf("Room %s not found for player %s", player.RoomID, player.ID)
+		return
+	}
 	log.Println(player.ID + ":" + guess)
 	playerName := ""
 	if player.ID == "AI" {
@@ -36,11 +44,6 @@ func handleGuess(player *Player, guess string) {
 		}
 		playerName = first + last
 	}
-	room, ok := GameHub.Rooms[player.RoomID]
-	if !ok || room == nil {
-		log.Printf("Room %s not found for player %s", player.RoomID, player.ID)
-		return
-	}
 	if room.CurrentTurnID != player.ID {
 		msg := Message{
 			Type:    "system",
@@ -57,12 +60,16 @@ func handleGuess(player *Player, guess string) {
 	if IsWin {
 		message := Message{
 			Type:    "gameOver",
-			Payload: fmt.Sprintf("Winner is %s,and Answer is %d", player.ID, room.Answer),
+			Payload: fmt.Sprintf("Winner is %s,and Answer is %s", player.ID, room.Answer),
 			From:    playerName,
 		}
 		JSON, _ := jsoniter.Marshal(message)
+		playersToRemove := []*Player{}
 		for _, p := range room.Players {
 			p.Send <- JSON
+			playersToRemove = append(playersToRemove, p)
+		}
+		for _, p := range playersToRemove {
 			GameHub.RemoveFormRoom(p)
 		}
 		room.InsertOnce.Do(func() {
@@ -72,7 +79,9 @@ func handleGuess(player *Player, guess string) {
 				Player2UID: room.Player2ID,
 				WinnerUID:  sql.NullString{String: winner, Valid: true},
 			}
-			player.GameService.InsertGameRecord(match)
+			if err := player.GameService.InsertGameRecord(match); err != nil {
+				log.Printf("InsertGameRecord failed: %v", err)
+			}
 		})
 		return
 

@@ -98,7 +98,7 @@ func GetRank() gin.HandlerFunc {
 	}
 }
 
-func StartAIGameHandler() gin.HandlerFunc {
+func StartAIGameHandler(s service.GameService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Query("token")
 		claim, msg := helpers.ValidateToken(token)
@@ -117,16 +117,18 @@ func StartAIGameHandler() gin.HandlerFunc {
 		roomID := helpers.GenerateRandomPassword(6)
 		//init player
 		player := &ws.Player{
-			ID:     playerID,
-			Conn:   conn,
-			RoomID: roomID,
-			Send:   make(chan []byte, 256),
+			ID:          playerID,
+			Conn:        conn,
+			RoomID:      roomID,
+			Send:        make(chan []byte, 256),
+			GameService: s,
 		}
 		//init AI
 		AI := &ws.Player{
-			ID:     "AI",
-			RoomID: roomID,
-			Send:   make(chan []byte, 256),
+			ID:          "AI",
+			RoomID:      roomID,
+			Send:        make(chan []byte, 256),
+			GameService: s,
 		}
 		room := &ws.Room{
 			ID:        roomID,
